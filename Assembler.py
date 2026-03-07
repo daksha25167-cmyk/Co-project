@@ -142,7 +142,7 @@ def main():
         sys.exit(1)
 
     input_file= sys.argv[1]
-    # output_file=sys.argv[2]#if you want it to execute change the if len(sys.argv)!=3
+    
 
     cleaned_lines,labels=pass1(input_file)
 

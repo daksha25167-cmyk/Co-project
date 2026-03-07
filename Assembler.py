@@ -79,6 +79,62 @@ def pass1(input_file):
     return cleaned_lines,labels
 
 
+def immediate_to_binary(val, bits):
+
+    val = int(val)
+
+    if val < 0:
+        val = (1 << bits) + val
+
+    binary = bin(val)[2:]
+
+    while len(binary) < bits:
+        binary = "0" + binary
+
+    return binary
+
+
+
+def encode_rtype(instructions, rd, rs1, rs2):
+
+    funct7,funct3= r_type[instructions]
+    
+    
+    opcode = "0110011"
+
+    rd_binary = reg[rd]
+    rs1_binary = reg[rs1]
+    rs2_binary = reg[rs2]
+
+    binary = (funct7 + rs2_binary + rs1_binary + funct3 + rd_binary + opcode)
+
+    return binary
+
+
+def encode_itype(instructions, rd, rs1, immediate):
+
+    funct3,opcode= i_type[instructions]
+   
+
+    rd_binary = reg[rd]
+    rs1_binary = reg[rs1]
+
+    imm_bin = immediate_to_binary(immediate,12)
+
+    binary = imm_bin + rs1_binary + funct3 + rd_binary + opcode
+
+    return binary
+
+
+def encode_lw(rd, operand):
+
+    offset,reg_part= operand.split("(")
+   
+    rs1 = reg_part[:-1]
+
+    return encode_itype("lw", rd, rs1, offset)
+
+
 if __name__=="__main__":
     
     if len(sys.argv)!=2:
@@ -98,4 +154,5 @@ if __name__=="__main__":
     print("Cleaned instructions")
 
     for line_no,instructions in cleaned_lines:
+
         print(f"{line_no}:{instructions}")

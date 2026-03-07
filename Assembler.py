@@ -79,6 +79,70 @@ def pass1(input_file):
     return cleaned_lines,labels
 
 
+def is_virtual_halt(op, operands):
+    if op!="beq":
+        return False
+    if len(operands)!=3:
+        return False
+    rs1 =operands[0].strip().lower()
+    rs2= operands[1].strip().lower()
+    imm= operands[2].strip()      
+
+    zero_names= ("zero", "x0")
+    return rs1 in zero_names and rs2 in zero_names and imm== "0"
+
+
+def check_errors(cleaned_lines):
+    """
+    error 1: wrong instructions
+    error 2: immediate is out of bounds
+    error 3: Missing virtual halt
+    error 4: virtual halt is not the last instruction
+    """
+    val_inst= [
+        "add","sub","sll", "srl","slt","sltu","or", "and","xor","addi", "sltiu", "lw", "jalr","sw","beq", "bne", "blt", "bge", "bltu", "bgeu", "lui", "auipc","jal"
+    ]
+
+    if not cleaned_lines:
+        print("Error: No instructions found in the file.")
+        sys.exit(1)
+
+
+    instr_list= []
+    for line_no, instr in cleaned_lines:
+        parts=instr.split(None, 1)        
+        op= parts[0].strip().lower()
+        if len(parts)> 1:
+            operands=[o.strip() for o in parts[1].split(",")]
+        else:
+            operands =[]
+        instr_list.append((line_no, op, operands))
+
+    # error 1
+    for line_no,op,operands in instr_list:
+        if op not in val_inst:
+            error(line_no, f"Unknown instruction '{op}'. ")
+
+        for operand in operands:
+            operand=operand.strip().lower()
+            if operand.lstrip("-").isdigit():
+                continue
+            if "(" in operand:
+                continue
+            if operand not in reg:
+                error(line_no, f"Unknown register '{operand}'.")
+
+    # error 2 is taken by immediate_to_binary function 
+    #error 3
+    last_line_no, last_op, last_operands= instr_list[-1]
+    if not is_virtual_halt(last_op,last_operands):
+        error(last_line_no, "Last instruction must be Virtual Halt: beq zero,zero,0")
+
+    #error 4
+    for line_no, op, operands in instr_list[:-1]:
+        if is_virtual_halt(op, operands):
+            error(line_no, "Virtual Halt (beq zero,zero,0) must only be the last instruction.")
+
 def immediate_to_binary(val, bits):
 
     val = int(val)
@@ -145,6 +209,7 @@ def main():
     
 
     cleaned_lines,labels=pass1(input_file)
+    check_errors(cleaned_lines) 
 
     print("Label Table")
 

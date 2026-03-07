@@ -25,19 +25,19 @@ def error(line_no,msg):
 def pass1(input_file):
     try:
         with open(input_file) as f:
-            lines=f.readlines()
+            lines = f.readlines()
 
     except FileNotFoundError:
         print("Error cannot open input file")
         sys.exit(1)
 
-    pc=0
+    pc =0
     labels={}
     cleaned_lines=[]
 
-    line_no=0
+    line_no = 0
     for line in lines:
-        line_no+=1
+        line_no +=1
 
         line=line.strip()
 
@@ -47,7 +47,7 @@ def pass1(input_file):
         if ":" in line:
             parts=line.split(":")
 
-            if len(parts)>2:
+            if len(parts)>2 :
                 error(line_no,"Multiple colons found.Invalid label format.")
             
             
@@ -64,7 +64,7 @@ def pass1(input_file):
 
 
         
-            labels[label]=pc
+            labels[label]= pc
 
             instructions=parts[1].strip()
 
@@ -141,7 +141,7 @@ if __name__=="__main__":
         print("Usage:python pass1.py input.asm")
         sys.exit(1)
 
-    input_file=sys.argv[1]
+    input_file= sys.argv[1]
     # output_file=sys.argv[2]#if you want it to execute change the if len(sys.argv)!=3
 
     cleaned_lines,labels=pass1(input_file)

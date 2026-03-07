@@ -14,3 +14,88 @@ b_type={"beq":"000", "bne":"001", "blt":"100", "bge":"101", "bltu":"110", "bgeu"
 u_type={"lui":"0110111", "auipc":"0010111"}
 #{op:opcode}
 j_type={"jal":"1101111"}
+
+
+
+def error(line_no,msg):
+    print(f"Error found at line {line_no}:{msg}")
+    sys.exit(1)
+
+
+def pass1(input_file):
+    try:
+        with open(input_file) as f:
+            lines=f.readlines()
+
+    except FileNotFoundError:
+        print("Error cannot open input file")
+        sys.exit(1)
+
+    pc=0
+    labels={}
+    cleaned_lines=[]
+
+    line_no=0
+    for line in lines:
+        line_no+=1
+
+        line=line.strip()
+
+        if line=="":
+            continue
+
+        if ":" in line:
+            parts=line.split(":")
+
+            if len(parts)>2:
+                error(line_no,"Multiple colons found.Invalid label format.")
+            
+            
+            label=parts[0].strip()
+
+            if parts[0]!=label:
+                error(line_no,"Inavlid spacing.No space found between label and colon")
+
+            if not label or not label[0].isalpha():
+                error(line_no,"Invalid label name.Must start with charecter")
+
+            if label in labels:
+                error(line_no,f"Duplicate label found: {label}")
+
+
+        
+            labels[label]=pc
+
+            instructions=parts[1].strip()
+
+            if instructions!="":
+                cleaned_lines.append((line_no,instructions))
+                pc=pc+4
+
+        else:
+            cleaned_lines.append((line_no,line))
+            pc=pc+4
+
+    return cleaned_lines,labels
+
+
+if __name__=="__main__":
+    
+    if len(sys.argv)!=2:
+        print("Usage:python pass1.py input.asm")
+        sys.exit(1)
+
+    input_file=sys.argv[1]
+    # output_file=sys.argv[2]#if you want it to execute change the if len(sys.argv)!=3
+
+    cleaned_lines,labels=pass1(input_file)
+
+    print("Label Table")
+
+    for label in labels:
+        print(f"{label}->{labels[label]}")
+
+    print("Cleaned instructions")
+
+    for line_no,instructions in cleaned_lines:
+        print(f"{line_no}:{instructions}")

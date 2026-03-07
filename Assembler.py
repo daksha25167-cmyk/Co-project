@@ -135,7 +135,7 @@ def encode_lw(rd, operand):
     return encode_itype("lw", rd, rs1, offset)
 
 
-if __name__=="__main__":
+def main():
     
     if len(sys.argv)!=2:
         print("Usage:python pass1.py input.asm")
@@ -156,3 +156,5 @@ if __name__=="__main__":
     for line_no,instructions in cleaned_lines:
 
         print(f"{line_no}:{instructions}")
+
+main()

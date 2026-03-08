@@ -145,13 +145,13 @@ def pass1(input_file):
     for line in lines:
         line_no +=1
 
-        line=line.strip()
+        text=line.strip()
 
-        if line=="":
+        if text=="":
             continue
 
-        if ":" in line:
-            parts=line.split(":")
+        if ":" in text:
+            parts=text.split(":")
 
             if len(parts)>2 :
                 error(line_no,"Multiple colons found.Invalid label format.")
@@ -179,7 +179,7 @@ def pass1(input_file):
                 pc=pc+4
 
         else:
-            cleaned_lines.append((line_no,pc,line))
+            cleaned_lines.append((line_no,pc,text))
             pc=pc+4
 
     return cleaned_lines,labels

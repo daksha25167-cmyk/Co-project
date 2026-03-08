@@ -184,17 +184,6 @@ def pass1(input_file):
 
     return cleaned_lines,labels
 
-def pass_jalr(t,line_no):
-    rd=t[1].rstrip(',')
-    rest=t[2] if len(t)>2 else ''
-    if "(" in rest:
-        offset,reg1=rest.split("()")
-        rs1=reg1.rstrip(")")
-        return rd,rs1,offset
-    else:
-        rs1=rest.rstrip(",")
-        imm=t[3] if len(t)>3 else "0"
-        return rd,rs1,imm
 
 def encode_instruction(line_no,pc,instruction,labels):
     t=instruction.replace(',',' ').split()
@@ -296,3 +285,4 @@ def main():
 
 
 main()
+

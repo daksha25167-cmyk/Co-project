@@ -39,6 +39,8 @@ def check_imm(val_str,bits,line_no):
 
 def immediate_to_binary(val, bits):
     val = int(val)
+    lower = -(2**(bits-1))
+    upper= (2**(bits-1))-1    
     if val < 0:
         val = (1 << bits) + val
     binary = bin(val)[2:]
@@ -285,4 +287,5 @@ def main():
 
 
 main()
+
 

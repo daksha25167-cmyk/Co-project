@@ -132,69 +132,39 @@ def pass1(input_file):
     try:
         with open(input_file) as f:
             lines = f.readlines()
-
     except FileNotFoundError:
         print("Error cannot open input file")
         sys.exit(1)
-
     pc =0
     labels={}
     cleaned_lines=[]
-
     line_no = 0
     for line in lines:
         line_no +=1
-
         line=line.strip()
-
         if line=="":
             continue
-
         if ":" in line:
             parts=line.split(":")
-
             if len(parts)>2 :
                 error(line_no,"Multiple colons found.Invalid label format.")
-            
-            
             label=parts[0].strip()
-
             if parts[0]!=label:
                 error(line_no,"Inavlid spacing.No space found between label and colon")
-
             if not label or not label[0].isalpha():
                 error(line_no,"Invalid label name.Must start with charecter")
-
             if label in labels:
                 error(line_no,f"Duplicate label found: {label}")
-
-
-        
             labels[label]= pc
-
             instructions=parts[1].strip()
-
             if instructions!="":
                 cleaned_lines.append((line_no,pc,instructions))
                 pc=pc+4
-
         else:
             cleaned_lines.append((line_no,pc,line))
             pc=pc+4
-
     return cleaned_lines,labels
 
-def pass_jalr(t,line_no):
-    rd=t[1].rstrip(',')
-    rest=t[2] if len(t)>2 else ''
-    if "(" in rest:
-        offset,reg1=rest.split("()")
-        rs1=reg1.rstrip(")")
-        return rd,rs1,offset
-    else:
-        rs1=rest.rstrip(",")
-        imm=t[3] if len(t)>3 else "0"
-        return rd,rs1,imm
 
 def encode_instruction(line_no,pc,instruction,labels):
     t=instruction.replace(',',' ').split()
@@ -293,6 +263,7 @@ def main():
         output_lines.append(binary)
     with open(output_file,'w') as f:
         f.write('\n'.join(output_lines))
+
 
 
 main()

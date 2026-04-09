@@ -125,6 +125,11 @@ def run(bin_file, trace_file, read_trace_file=None):
             decode_rtype(instr)
 
         # ── Person 2 will add I-type, S-type here ─────────────────────────────
+def sign_extend(value, bits):
+    if value & (1 << (bits - 1)):
+        value = value - (1 << bits)
+    return value
+
         # ── Person 3 will add B-type, J-type here ─────────────────────────────
         # ── Person 4 will add U-type, memory dump, file output here ───────────
         regs[0] = 0

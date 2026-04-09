@@ -123,13 +123,24 @@ def run(bin_file, trace_file, read_trace_file=None):
 
         if opcode == 0b0110011:
             decode_rtype(instr)
+        elif opcode == 0b0010011:                                               #PERSON 2
+            rd  = (instr >> 7) & 0x1F
+            funct3 = (instr >> 12) & 0x07
+            rs1 = (instr >> 15) & 0x1F
 
-        # ── Person 2 will add I-type, S-type here ─────────────────────────────
-def sign_extend(value, bits):
-    if value & (1 << (bits - 1)):
-        value = value - (1 << bits)
-    return value
+            imm = sign_ext((instr >> 20) & 0xFFF, 12)
 
+            if funct3 == 0b000:   # addi
+                result = u32(to_int32(regs[rs1]) + imm)
+
+            elif funct3 == 0b011: # sltiu
+                result = 1 if regs[rs1] < u32(imm) else 0
+
+            else:
+                result = 0
+
+            if rd != 0:
+                regs[rd] = result
         # ── Person 3 will add B-type, J-type here ─────────────────────────────
         # ── Person 4 will add U-type, memory dump, file output here ───────────
         regs[0] = 0

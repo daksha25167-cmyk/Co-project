@@ -120,25 +120,7 @@ def run(bin_file, trace_file, read_trace_file=None):
             output_lines.append(' '.join(parts) + ' ')
             break
         next_PC = u32(PC + 4)
-
-        elif opcode == 0b0010011:   
-            rd = (instr >> 7) & 0x1F
-            funct3 = (instr >> 12) & 0x07
-            rs1 = (instr >> 15) & 0x1F
-
-            imm = sign_ext((instr >> 20) & 0xFFF, 12)
-
-            if funct3 == 0b000:   # addi
-                result = u32(to_int32(regs[rs1]) + imm)
-
-            elif funct3 == 0b011: # sltiu
-                result = 1 if regs[rs1] < u32(imm) else 0
-
-            else:
-                result = 0
-
-            if rd != 0:
-                regs[rd] = result
+        #person2
         # ── Person 3 will add B-type, J-type here ─────────────────────────────
         # ── Person 4 will add U-type, memory dump, file output here ───────────
         regs[0] = 0

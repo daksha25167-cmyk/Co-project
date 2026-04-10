@@ -135,3 +135,67 @@ for _ in range(200000):
                 if not is_valid_mem(ea):
                     return trace_lines, []
                 mem_write(ea,regs[rs2])
+
+        elif opcode == 0b1100011:   # B-type
+            f3=(instr>>12)&0x7
+            rs1=(instr>>15)&0x1F
+            rs2=(instr>>20)&0x1F
+            imm=sign_ext(((instr>>31)&1)<<12|
+                        ((instr>>7)&1)<<11|
+                        ((instr>>25)&0x3F)<<5|
+                        ((instr>>8)&0xF)<<1,13)
+            v1,v2=to_int32(regs[rs1]),to_int32(regs[rs2])
+            u1,u2=regs[rs1],regs[rs2]
+            br=((f3==0 and v1==v2)or
+                (f3==1 and v1!=v2)or
+                (f3==4 and v1<v2)or
+                (f3==5 and v1>=v2)or
+                (f3==6 and u1<u2)or
+                (f3==7 and u1>=u2))
+            
+            next_PC=u32(PC+imm) if br else u32(PC+4)
+
+        elif opcode==0b0110111:   # lui
+            rd=(instr>>7)&0x1F
+            if rd:regs[rd]=instr&0xFFFFF000
+
+        elif opcode == 0b0010111:   # auipc
+            rd=(instr>>7)&0x1F
+            if rd!=0:
+                regs[rd]=u32(PC+(instr&0xFFFFF000))
+
+        elif opcode == 0b1101111:   # jal
+            rd=(instr>>7)&0x1F
+            imm=sign_ext(((instr>>31)&0x1)<<20 |
+                        ((instr>>12)&0xFF)<<12|
+                        ((instr>>20)&0x1)<<11|
+                        ((instr>>21)&0x3FF)<<1,21)
+            if rd!=0:
+                regs[rd]=u32(PC+4)
+            next_PC=u32(PC+imm)
+
+        regs[0]=0
+        PC=next_PC
+        trace_parts=[to_bin32(PC)]+[to_bin32(r) for r in regs]
+
+        trace_lines.append(f"{' '.join(trace_parts)}")
+
+    mem_lines=[f"0x{DATA_START+i*4:08x}:{to_bin32(data_mem.get(DATA_START+i*4,0))}" for i in range(DATA_WORDS)]
+    return trace_lines,mem_lines
+
+def main():
+    if len(sys.argv)<3:
+        print("Usage: python3 Simulator.py <bin_file> <trace_file>")
+        sys.exit(1)
+    with open(sys.argv[1]) as f:
+        lines=f.readlines()
+    trace,mem=simulate(lines)
+    output=trace+mem
+    with open(sys.argv[2],'w') as f:
+        f.write('\n'.join(output)+'\n')
+    if len(sys.argv)>3:
+        with open(sys.argv[3],'w') as f:
+            f.write('\n'.join(output)+'\n')
+
+if __name__=='__main__':
+    main()

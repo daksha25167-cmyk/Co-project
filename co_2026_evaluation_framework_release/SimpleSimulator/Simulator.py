@@ -24,7 +24,7 @@ def u32(val):
     return val & 0xFFFFFFFF
 
 def is_valid_mem(addr):
-    # Must be word-aligned (multiple of 4) and in a valid region
+   
     if addr % 4 != 0:
         return False
     if DATA_START <= addr <= DATA_END:
@@ -41,3 +41,52 @@ def simulate(bin_lines):
         if line:
             instr_mem[addr] = int(line, 2)
             addr += 4
+    regs = [0] * 32
+    regs[2] = SP_INIT
+
+    data_mem  = {DATA_START  + i * 4: 0 for i in range(DATA_WORDS)}
+    stack_mem = {STACK_START + i * 4: 0 for i in range(32)}
+
+
+def mem_read(address):
+    address = u32(address)
+    if DATA_START <= address <= DATA_END:
+        return data_mem.get(address, 0)
+
+    elif STACK_START <= address <= STACK_END:
+        return stack_mem.get(address, 0)
+    return 0
+
+
+def mem_write(address, value):
+    address = u32(address)
+    value = u32(value)
+    if DATA_START <= address <= DATA_END:
+        data_mem[address] = value
+    elif STACK_START <= address <= STACK_END:
+        stack_mem[address] = value
+
+
+PC = PC_INIT
+trace_lines = []
+
+for _ in range(200000):
+    instr = instr_mem.get(PC)
+    if instr is None:
+        break
+    opcode = instr & 0x7F
+    next_PC = u32(PC + 4)
+
+        
+    if instr == 0b00000000000000000000000001100011:
+        current_state = [to_bin32(PC)] + [to_bin32(r) for r in regs]
+        trace_lines.append(' '.join(current_state) + ' ')
+        mem_lines = []
+        for i in range(DATA_WORDS):
+            addr = DATA_START + i * 4
+            mem_lines.append(
+                '0x{:08X}:{}'.format(addr, to_bin32(data_mem.get(addr, 0)))
+            )
+        return trace_lines, mem_lines
+
+

@@ -24,7 +24,7 @@ def u32(val):
     return val & 0xFFFFFFFF
 
 def is_valid_mem(addr):
-    # Must be word-aligned (multiple of 4) and in a valid region
+    
     if addr % 4 != 0:
         return False
     if DATA_START <= addr <= DATA_END:
@@ -70,19 +70,26 @@ def simulate(bin_lines):
 
     for _ in range(200000):
         instr = instr_mem.get(PC)
+
         if instr is None:
             break
 
-        opcode  = instr & 0x7F
+        opcode = instr & 0x7F
         next_PC = u32(PC + 4)
 
-        # Virtual Halt: beq x0, x0, 0 — print state then dump memory
+        
         if instr == 0b00000000000000000000000001100011:
-            trace_lines.append(' '.join([to_bin32(PC)] + [to_bin32(r) for r in regs]) + ' ')
-            mem_lines = [
-                '0x{:08X}:{}'.format(DATA_START + i * 4, to_bin32(data_mem.get(DATA_START + i * 4, 0)))
-                for i in range(DATA_WORDS)
-            ]
+
+            current_state = [to_bin32(PC)] + [to_bin32(r) for r in regs]
+            trace_lines.append(' '.join(current_state) + ' ')
+
+            mem_lines = []
+            for i in range(DATA_WORDS):
+                addr = DATA_START + i * 4
+                mem_lines.append(
+                    '0x{:08X}:{}'.format(addr, to_bin32(data_mem.get(addr, 0)))
+                )
+
             return trace_lines, mem_lines
 
         if opcode== 0b0110011:

@@ -121,10 +121,8 @@ def run(bin_file, trace_file, read_trace_file=None):
             break
         next_PC = u32(PC + 4)
 
-        if opcode == 0b0110011:
-            decode_rtype(instr)
-        elif opcode == 0b0010011:                                               #PERSON 2
-            rd  = (instr >> 7) & 0x1F
+        elif opcode == 0b0010011:   
+            rd = (instr >> 7) & 0x1F
             funct3 = (instr >> 12) & 0x07
             rs1 = (instr >> 15) & 0x1F
 

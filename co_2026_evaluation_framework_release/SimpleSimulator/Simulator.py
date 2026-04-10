@@ -88,5 +88,50 @@ for _ in range(200000):
                 '0x{:08X}:{}'.format(addr, to_bin32(data_mem.get(addr, 0)))
             )
         return trace_lines, mem_lines
+    
+    if opcode== 0b0110011:
+            rd=(instr>>7)&0x1F; f3=(instr>>12)&0x7; rs1=(instr>>15)&0x1F; rs2=(instr>>20)&0x1F; f7=(instr>>25)&0x7F
+            v1,v2=to_int32(regs[rs1]),to_int32(regs[rs2]); u1,u2=regs[rs1],regs[rs2]
+            if f3==0: r=u32(v1+v2) if f7==0 else u32(v1-v2)
+            elif f3== 1: r=u32(u1<< (u2&0x1F))
+            elif f3==2: r=1 if v1<v2 else 0
+            elif f3== 3: r=1 if u1<u2 else 0
+            elif f3 ==4: r=u1^u2
+            elif f3==5: r= u1>>(u2&0x1F)
+            elif f3 ==6: r= u1|u2
+            else: r=u1&u2
+            if rd: regs[rd] =u32(r)
 
+    elif opcode== 0b0010011:
+        rd=(instr>>7)&0x1F; f3=(instr>>12)&0x7; rs1=(instr>>15)&0x1F
+        imm=sign_ext((instr>> 20)&0xFFF,12)
+        if f3==0: r=u32(to_int32(regs[rs1])+ imm)
+        elif f3==3: r=1 if regs[rs1] <u32(imm) else 0
+        else: r=0
+        if rd: regs[rd] =r
 
+    elif opcode== 0b0000011:   
+        rd= (instr>>7)&0x1F; f3= (instr>>12)&0x7; rs1=(instr >>15)&0x1F
+        imm=sign_ext((instr >>20)&0xFFF,12)
+        if f3 ==2:
+            ea= u32(to_int32(regs[rs1])+imm)
+            # Invalid memory access: stop immediately, no more output
+            if not is_valid_mem(ea):
+                return trace_lines, []
+            if rd: regs[rd]= u32(mem_read(ea))
+
+        elif opcode==0b1100111:   
+            rd= (instr >>7)&0x1F; rs1=(instr >>15)&0x1F
+            imm=sign_ext((instr>>20)&0xFFF,12)
+            ret=u32(PC+ 4); next_PC= u32((to_int32(regs[rs1])+imm)&~1)
+            if rd: regs[rd] =ret
+
+        elif opcode== 0b0100011:   
+            f3= (instr>>12)&0x7; rs1=(instr>>15)&0x1F; rs2=(instr>>20)&0x1F
+            imm= sign_ext((((instr>>25)&0x7F)<<5)|((instr>>7)&0x1F),12)
+            if f3 ==2:
+                ea =u32(to_int32(regs[rs1])+imm)
+                # invalid memry access:stop immediately,no more output
+                if not is_valid_mem(ea):
+                    return trace_lines, []
+                mem_write(ea,regs[rs2])

@@ -48,20 +48,22 @@ def simulate(bin_lines):
     data_mem  = {DATA_START  + i * 4: 0 for i in range(DATA_WORDS)}
     stack_mem = {STACK_START + i * 4: 0 for i in range(32)}
 
-    def mem_read(a):
-        a = u32(a)
-        if DATA_START <= a <= DATA_END:
-            return data_mem.get(a, 0)
-        if STACK_START <= a <= STACK_END:
-            return stack_mem.get(a, 0)
+    def mem_read(address):
+        address = u32(address)
+        if DATA_START <=address <= DATA_END:
+            return data_mem.get(address, 0)
+        elif STACK_START <= address <= STACK_END:
+            return stack_mem.get(address,0)
         return 0
+       
 
-    def mem_write(a, v):
-        a, v = u32(a), u32(v)
-        if DATA_START <= a <= DATA_END:
-            data_mem[a] = v
-        elif STACK_START <= a <= STACK_END:
-            stack_mem[a] = v
+    def mem_write(address, value):
+        address = u32(address)
+        value = u32(value)
+        if DATA_START <= address <=DATA_END:
+            data_mem[address] = value
+        elif STACK_START <=address <=STACK_END:
+            stack_mem[address] = value
 
     PC = PC_INIT
     trace_lines = []

@@ -136,7 +136,7 @@ for _ in range(200000):
                     return trace_lines, []
                 mem_write(ea,regs[rs2])
 
-        elif opcode == 0b1100011:   # B-type
+        elif opcode == 0b1100011:   
             f3=(instr>>12)&0x7
             rs1=(instr>>15)&0x1F
             rs2=(instr>>20)&0x1F
@@ -155,16 +155,16 @@ for _ in range(200000):
             
             next_PC=u32(PC+imm) if br else u32(PC+4)
 
-        elif opcode==0b0110111:   # lui
+        elif opcode==0b0110111:  
             rd=(instr>>7)&0x1F
             if rd:regs[rd]=instr&0xFFFFF000
 
-        elif opcode == 0b0010111:   # auipc
+        elif opcode == 0b0010111:   
             rd=(instr>>7)&0x1F
             if rd!=0:
                 regs[rd]=u32(PC+(instr&0xFFFFF000))
 
-        elif opcode == 0b1101111:   # jal
+        elif opcode == 0b1101111:  
             rd=(instr>>7)&0x1F
             imm=sign_ext(((instr>>31)&0x1)<<20 |
                         ((instr>>12)&0xFF)<<12|
